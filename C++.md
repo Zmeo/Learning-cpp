@@ -170,7 +170,7 @@
     return a+b;
   }
   auto mod=[](int a,int b){return a%b;};
-  struct divide{int operaator()(int a,int b){return a/b;}};
+  struct divide{int operator()(int a,int b){return a/b;}};
   
   std::function<int(int,int)> a=add;
   std::function<int(int,int)> b=mod;
@@ -245,7 +245,7 @@
     
     2. 内部静态对象的引用。
     
-    3.返回一个泄露内存的动态分配的对象，解决方式：重载运算符的返回值不是类型的引用，而是类型，即不是int&，而是int。
+    3. 返回一个泄露内存的动态分配的对象，解决方式：重载运算符的返回值不是类型的引用，而是类型，即不是int&，而是int。
     
   - 系统资源没有得到正确释放，例如socket,handle...。
   
@@ -273,9 +273,9 @@
     
   2. 链地址：哈希桶
   
-  3.公共溢出区
+  3. 公共溢出区
   
-  4.rehash
+  4. rehash
   
 19.内置类型的构造
 
@@ -365,7 +365,7 @@
     
     p=p+1;  //正确
     
-    * p=16; //错误
+    *p=16; //错误
     
   - 指针常量
   
@@ -373,7 +373,7 @@
     
     p=p+1;   //错误
     
-    * p=16;  //正确
+    *p=16;  //正确
 
 23.new,operator new,placement new
 
