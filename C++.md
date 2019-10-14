@@ -377,4 +377,159 @@
 
 23.new,operator new,placement new
 
+  new的步骤，语句Foo* p = new Foo();为例：
+  
+  1. Foo* p;
+  
+  2.void* raw=operator new(sizeof(Foo));
+  
+  3.try{
+  
+      p=new(raw) Foo();
+      
+    }catch(.......){
+    
+      operator delete(raw);
+      
+      throw;
+      
+    }
+   
+   - operator new默认调用分配内存的代码，尝试得到一段堆的空间，若失败就调用new_handler继续尝试。
+   
+   - placement new调用对象的构造函数生成类对象
+   
+   
+24.模板函数：提供了一类函数的抽象，它提供了任意类型为参数及返回值，函数模板经过实例化生成的具体函数成为模板函数，函数模板代表了一类函数，模板函数表示具体函数。
+
+25.类型转换函数：将当前类的类型转为其他类型，operator type(){......return data;}
+
+  - type可以是内置类型，类类型，typedef定义的类别名，任何可作为返回类型的（除去void)，一般而言，不会允许转为数组或函数，可以是指针或引用。
+  
+  - 一般不会更改被转对象，将其定义为cosnt成员。
+  
+  - 可以被继承，可以是虚函数。
+  
+  - 可以有多个（类似重载），但若多个要转的目标类型本身就可以互相转换，有时会引发二义问题，如：int,double。
+  
+26.隐式转换规则：
+
+  ```C++
+  struct Exp{explicit Exp(const char*){}};
+  Exp e1("abc");    //正确
+  Exp e2="abc";     //错误，拷贝初始化不考虑显示构造
+  
+  struct Imp{Imp(const char*){}};
+  Imp i1("abc");    //正确
+  Imp i2="abc";     //正确
+  
+  struct S{S(std::string){}};
+  S s("abc");       //正确，const char[4]转为string
+  S s="abc";        //错误，const char[4]无法转为S
+  S s="abc"s;       //正确，std::string 转为S
+  ```
+  
+  * 引申问题：深拷贝，浅拷贝
+  
+27.Java,volatile关键字，内存回收机制
+
+  volatile:表示不会只在工作内存工作，会写入主存，保证内存可见性。工作内存修改完后写回主存，一致性只能靠原子性保证。
+
+  [JVM的内存区域和垃圾回收机制](https://blog.csdn.net/qq_34760508/article/details/80930508)
+  
+28.throw与return的区别
+
+  当f1调用f2时，return直接返回至调用f2的后一条语句，throw会沿函数调用回溯，直到找到直/间接包含对f2调用的try语句，将执行下一个匹配的catch。
+  
+29.C++11新特性
+
+  1. 原子变量
+  
+  ```C++
+  atomic_int num{0};
+  num++;              //原子
+  ```
+  
+  2. lambda表达式
+  
+  ```C++
+  auto fun=[](const char* str){cout<<str<<endl;};
+  thread t1(fun,"hello world!");
+  thread t2(fun,"hello beijing!");
+  ```
+  
+  3. 可变参数列表
+  
+  ```C++
+  int show(const char* fun,...)
+  {
+    va_list ap;
+    va_start(ap,fun);
+    vprintf(fun,ap);
+    va_end(ap);
+    return 0;
+  }
+  int main()
+  {
+    thread t1(show,"%s %d %c %f","hello world",100,'A',3.14);
+    return 0;
+  ```
+  
+  4.移动语义move
+  
+  ```C++
+  thread t1([](){cout<<"thread 1"<<endl;});
+  cout<<"thread 1 id is"<<t1.get_id()<<endl;
+  thread t2=move(t1);
+  cout<<"thread 2 id is"<<t2.get_id()<<endl;
+  return 0;
+  ```
+  
+30.
+
+- 虚继承
+
+  主要解决在多重继承时，基类可能被多次继承，虚基类主要提供一个基类给派生类。
+  
+  当基类为虚基类时，只拷贝一次虚基类。若派生类继承自多个基类，有虚和非虚两种，先调用虚基类的构造，在调用非虚基类，最后调用派生类构造。
+  
+- 虚表
+
+  虚表在编译期确定，而类对象的虚函数指针在运行时确定。
+  
+  构造中可以用虚函数吗？原理上可以，但是派生类对象构造期间进入基类的构造时，对象类型为基类类型，所以虚函数始终仅仅调用基类的虚函数，毫无多态效果。
+  
+  一个类构造时，创建虚表，整个类共有。
+  
+  eg:
+  
+  class Base
+  
+  class Derive: Base
+  
+  虚表表示为：
+  
+  无继承：Base::f()|Base::g()|Base::h()|Derive::f1()|Derive::f2()|Derive::h1()
+  
+  继承：Derive::f()|Base::g()|Base::h()|Derive::g1()|Derive::h1()
+  
+  多继承：
+  
+  Derive::f()|Base1::g()|Base1::h()|Derive::g()
+  
+  Derive::f()|Base2::g()|Base2::h()
+  
+  Derive::f()|Base3::g()|Base3::h()
+  
+  顺序：
+  
+  1. 子类调用基类构造
+  
+  2. 基类设置vptr
+  
+  3. 基类初始化列表，进行构造
+  
+  4. 子类设置vptr
+  
+  5. 子类初始化列表，进行构造
   
